@@ -5,19 +5,25 @@ cd /app
 
 git config --global --add safe.directory /app
 
-if [ ! -f .env ]; then
+if [ "$DB_DATABASE" == "neondb" ]; then
+    echo "APP_KEY=$APP_KEY" > .env
+    echo "APP_URL=$APP_URL" >> .env
+    echo "DB_CONNECTION=$DB_CONNECTION" >> .env
+    echo "DB_HOST=$DB_HOST" >> .env
+    echo "DB_PORT=$DB_PORT" >> .env
+    echo "DB_DATABASE=$DB_DATABASE" >> .env
+    echo "DB_USERNAME=$DB_USERNAME" >> .env
+    echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+else
     echo "==> Criando .env a partir do .env.example"
     cp .env.example .env
+    echo "==> Gerando APP_KEY"
+    php artisan key:generate --force
 fi
 
 if [ ! -d vendor ] || [ ! -f vendor/autoload.php ]; then
     echo "==> Instalando dependências PHP (composer install)"
     composer install --no-interaction --prefer-dist --optimize-autoloader
-fi
-
-if ! grep -q "^APP_KEY=base64:" .env 2>/dev/null; then
-    echo "==> Gerando APP_KEY"
-    php artisan key:generate --force
 fi
 
 echo "==> Aguardando PostgreSQL em ${DB_HOST}:${DB_PORT}"
